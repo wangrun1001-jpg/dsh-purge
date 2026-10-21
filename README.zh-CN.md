@@ -1,33 +1,193 @@
+> **本仓库：wangrun1001-jpg/dsh-purge 适配维护副本。** 已整合 [Potato1008ypy 的 DSH 0.2.1-rc.2 适配版](https://github.com/Potato1008ypy/dsh-purge-0.2.1rc2-fix) `v1.1.71-dsh0.2.1rc2-fix.7`，来源提交 `e9f03ca1c03d05b1010eadf8424c4e0737d40295`。原项目作者为 **小杨 / YuJunZhiXue**，原存档镜像由 **mmparko** 保留。完整来源见 [MIRROR-NOTICE.md](MIRROR-NOTICE.md)。
+>
+> 插件安装元数据已指向本仓库；下方保留适配来源的安装脚本与详细说明并注明署名。安装插件本身不会点击清洗「应用」；应用宿主补丁及重启仍是单独操作。
+
 <p align="center">
   <img src="docs/banner.svg" alt="dsh-purge" width="720">
 </p>
 
-<h1 align="center">⚔️ DeepSeek Harness 网络安全红队工具（dsh-purge）</h1>
-
-<p align="center"><strong>Version 1.1.71</strong></p>
+<h1 align="center">dsh-purge · DSH Desktop 0.2.1-rc.2 适配修复版</h1>
 
 <p align="center">
-  <em>DeepSeek Harness 破甲：让所有模型都能破甲，不同模型可换不同提示词；默认提示词面向国模「小码酱」。Jailbreak for every model — swap prompts per model. 求 Star 收藏 ⭐ 如要二开，请查看署名要求部分</em>
+  <sub>基线：上游 <code>1.1.71</code>（commit <code>6c1d638</code>）· 许可：MIT · 用途：本地安全研究与授权测试</sub>
 </p>
 
 <p align="center">
-  <a href="https://github.com/YuJunZhiXue/dsh-purge/stargazers"><img src="https://img.shields.io/github/stars/YuJunZhiXue/dsh-purge?logo=github&label=Stars" alt="GitHub stars"></a>
-  <a href="https://github.com/YuJunZhiXue/dsh-purge/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-MIT-65a30d?style=flat" alt="MIT license"></a>
-  <a href="https://awesome-dsh-plugin.com"><img src="https://awesome-dsh-plugin.com/badge.svg" alt="awesome · DSH plugin"></a>
-  <a href="https://deepseek.stream/plugins/dsh-purge"><img src="https://img.shields.io/badge/Hub-dsh--purge-1a73e8" alt="DeepSeek Harness Hub"></a>
-  <a href="https://www.deepseek.com/harness/"><img src="https://img.shields.io/badge/dsh-0.2.0--rc.2-blue" alt="DSH"></a>
+  <a href="https://github.com/Potato1008ypy/dsh-purge-0.2.1rc2-fix/stargazers"><img src="https://img.shields.io/github/stars/Potato1008ypy/dsh-purge-0.2.1rc2-fix?logo=github&label=Stars" alt="GitHub stars"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-65a30d?style=flat" alt="MIT license"></a>
+  <a href="https://github.com/YuJunZhiXue/dsh-purge"><img src="https://img.shields.io/badge/upstream-YuJunZhiXue%2Fdsh--purge-6b7280" alt="Upstream"></a>
+  <a href="https://github.com/Potato1008ypy/dsh-purge-0.2.1rc2-fix/releases"><img src="https://img.shields.io/badge/version-1.1.71--dsh0.2.1rc2--fix.2-16a34a" alt="Version"></a>
+  <a href="https://www.deepseek.com/harness/"><img src="https://img.shields.io/badge/dsh-0.2.1--rc.2-blue" alt="DSH"></a>
+  <a href="QUICKSTART.md"><img src="https://img.shields.io/badge/install-one--page-16a34a" alt="One-page install"></a>
   <br>
   <img src="https://img.shields.io/badge/Node.js-%3E%3D18-339933?logo=node.js&logoColor=fff" alt="Node.js">
   <img src="https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=000" alt="JavaScript">
 </p>
 
 <p align="center">
-  <a href="https://dsh-plugin.org/plugins/yujunzhixue/dsh-purge"><img src="https://dsh-plugin.org/badges/listed.svg" alt="Listed on dsh-plugin.org"></a>
-</p>
-
-<p align="center">
   <a href="README.md">English</a> | <a href="README.zh-CN.md">中文</a>
 </p>
+
+---
+
+## 概述
+
+本仓库是 [`YuJunZhiXue/dsh-purge`](https://github.com/YuJunZhiXue/dsh-purge) 的适配分支，锁定于上游 `1.1.71`（commit `6c1d638`，release [v1.1.71](https://github.com/YuJunZhiXue/dsh-purge/releases/tag/v1.1.71)）。
+
+上游 `1.1.71` 在 DSH（DeepSeek Harness）`0.2.1-rc.2` 上无法正常工作：宿主侧的九处结构性变更使插件在加载、组合、补丁应用或提示词装配阶段报错或静默失效，其中一处会导致 DSH 无法启动。本仓库针对这九处做兼容修复，并满足以下约束：
+
+- **不改变产品行为**：不改写提示词内容、不移除功能，只让既有行为在新宿主上重新成立。
+- **版本自适应**：每处修复都带宿主结构探测，在 `0.2.0-rc.2` 等旧宿主上自动退让。
+- **可回归验证**：随包提供离线测试，逐条锁定修复，不依赖网络或宿主的 `yaml`。
+
+除代码修复外，补丁注册表新增 `retired` 标记，使「未命中」与「已退役」在状态面板上可区分（预期终态 `applied 66 / na 15 / pending 1`，其中 `#40` 仅在 complete 模式下命中）。
+
+## 兼容性
+
+| 宿主 | profile | 状态 |
+|---|---|---|
+| DSH Desktop `0.2.1-rc.2`（Windows） | `desktop` | **实测通过**，本仓库的验证基线 |
+| dsh CLI `0.2.1-rc.2` | `web` | 适用同一套修复；本轮未逐项回归 |
+| DSH `0.2.0-rc.2` | `desktop` / `web` | 修复为版本自适应；未逐项回归 |
+| DSH < `0.2.0` | — | 不支持 |
+
+注：原版 DSH 与 DSH Desktop 是同一个包 `@deepseek-ai/dsh`，`bundles` 组合逻辑相同；差异仅在 `desktop` profile 的管理入口（见「安装」）。运行时要求 Node.js **≥18**；Windows 下避免控制台闪窗需 **≥22**。
+
+## 修复清单
+
+| ID | 症状 | 根因（宿主侧证据） | 处理 |
+|---|---|---|---|
+| FIX-01 | 启用后 **DSH 无法启动**；配置项重复渲染；两个 `dsh-purge-redteam-store` 争用同一 SQLite 文件 | `cordis.patch.yml` 中出现两个 `- insert:` 块，四个插件行被插入两遍；宿主每次启动都重新解析该文件 | 合并为单块（1 个 insert 块 / 4 个插件行） |
+| FIX-02 | `[E] [tool-subagent] toolFilter is no longer supported`，预设无法挂载 | `0.2.1-rc.2` 从 `@deepseek-ai/dsh-tool-subagent` 的 Config 中删除 `toolFilter` / `persona`，写入即抛错 | 模板移除该键；`repairDelegation()` 增加行式剥离，自动迁移旧格式预设 |
+| FIX-03 | `unknown prompt variable "{{cwd}}"`，工作目录显示为空或 `{ {cwd}}` | `0.2.1` 仅注册 `model` / `provider`；严格插值遇未注册变量抛错并丢弃整批 section | 插件自行注册 `cwd`；persona 段优先写入字面路径 |
+| FIX-04 | 补丁 `#40 COMPLETE_PROMPT_KEEP_INJECT` 静默失效 | 宿主 `assemble()` 将 `contexts` 收窄为 `requiredContexts` 过滤，旧锚点失配 | 补 `0.2.1` 形态 pattern；替换体抽为 `completePromptInjectBody()` |
+| FIX-05 | `desktop-shell` 相关补丁全部失效 | `0.2.1` 可执行名称为 `DSH Desktop.exe`，`isOfficialHarnessExecutable` 仅识别 `deepseek-harness` | 补入 `DSH Desktop.exe` / `dsh-desktop.exe` 并改为容错匹配 |
+| FIX-06 | 任一段插值失败即丢失整个人格 | 宿主 `assemble()` 异常时返回 `{ sections: [] }` | 按注册顺序重建段表，仅丢弃插值失败的段 |
+| FIX-07 | 应用后无任何 `.dshpurge.bak` 生成，还原与卸载失效 | `extract-asar.js` 的 `HOST_SYNC` 缺少 `closeSync`，而 `hostFs` 依该表生成；`backupAll()` 占位句柄未释放，Windows 下 rename 报 `EPERM` | 新增 `HOST_FD` 表单独装配 fd 类方法 |
+| FIX-08 | 预设声明「子代理为叶子」，实际可经 `workflow` / `ralph` 递归 | `workflow-ptc` 的 `childRequest()` 不携带 `maxDepth`，回落到宿主默认值 10；子会话继承父预设工具表 | `tool-workflow` / `tool-ralph` 置 `disabled: true`，引擎保留 |
+| FIX-09 | 桌面端点「应用」后 `dsh: fatal load failure` | 同步函数内调用 async `atomicCopyFile()` 未 `await`，reject 经 `unhandledRejection` 升级为 `uncaughtException` | 改用同为原子写、但全程同步的 `atomicWriteSync()` |
+
+FIX-01 至 FIX-06 由本仓库定位。FIX-07 至 FIX-09 在与 [`evilevil/dsh-purge-021rc2`](https://github.com/evilevil/dsh-purge-021rc2) 逐条比对后并入；实现方式与该仓库不同，取舍见 [FIXES.md](FIXES.md)。
+
+逐条的症状、根因、改动与验证方法见 **[FIXES.md](FIXES.md)**；「已知限制与设计取舍」另列于本文件。
+
+## 安装
+
+安装分三步：**装包 → 启用 → 打补丁**。前两步让宿主加载本插件，第三步才真正改写宿主文件，且不会自动执行。
+
+| 步骤 | 操作位置 |
+|---|---|
+| 1 · 装包 | `install.ps1`，或「插件」页 → **添加插件** |
+| 2 · 启用 | 一键脚本会顺带写好 `bundles`；否则同一页 → **启动**，然后重启 DSH |
+| 3 · 打补丁 | 会话标题旁 **dsh-purge → 清洗 → 应用** |
+
+按推荐顺序，四条装法任选一条：
+
+| 顺序 | 方式 | 要不要关 DSH | 自动写 `bundles` |
+|---|---|---|---|
+| 1 | 一键脚本 `install.ps1` | 要 | ✅ |
+| 2 | `pnpm add` | 不要 | ❌（装完手动启用一次） |
+| 3 | 桌面端命令行 helper | 要 | ✅ |
+| 4 | GUI「插件」页 | 不要（但可能撞 `EPERM`） | ✅ |
+
+### 1 · 一键脚本（Windows，最省事）
+
+```powershell
+# 先完全退出 DSH
+powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1
+```
+
+没有仓库也行，一行拉取并执行：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -Command "iwr -UseB https://raw.githubusercontent.com/Potato1008ypy/dsh-purge-0.2.1rc2-fix/v1.1.71-dsh0.2.1rc2-fix.7/install.ps1 -OutFile $env:TEMP\dsh-purge-install.ps1; & $env:TEMP\dsh-purge-install.ps1"
+```
+
+自动探测 DSH 安装目录与运行模式，装包后写入 `dsh.profile.bundles`——**重启即生效，不用再点启用**，等于把上面第 1、2 步合成一步。DSH 未退出时脚本拒绝执行（否则会撞 `ERR_PNPM_EPERM`）。完整开关见 [INSTALL.md](INSTALL.md) 2.0。
+
+### 2 · 通过 `pnpm add` 安装（最直接）
+
+```bash
+pnpm add "github:Potato1008ypy/dsh-purge-0.2.1rc2-fix#v1.1.71-dsh0.2.1rc2-fix.7"
+```
+
+`pnpm add` 只写 `dependencies`，不登记 `dsh.profile.bundles`。装完须到「插件」页手动启用，再重启 DSH。
+
+> **不要用 Release 的 tarball 地址安装。** 宿主给 pnpm 带 `CI=true`（冻结模式），此时 `pnpm add <远端 tarball 地址>` 会把依赖写进锁文件却不写 `integrity`。等到真正需要取包时（换机器、空缓存、`--frozen-lockfile`），pnpm 拒绝安装，并因校验收敛而**冻结该 profile 的所有安装与卸载**，报 `ERR_PNPM_MISSING_TARBALL_INTEGRITY`。GitHub 源与本地 `file:` 压缩包都不会触发。恢复步骤见 [INSTALL.md](INSTALL.md) 第 7.5 节。
+
+### 3 · 桌面端命令行（helper）
+
+```bat
+:: dsh-plugin.bat 是 desktop-cli.js 的封装，见 INSTALL.md
+dsh-plugin.bat plugin --profile desktop add "github:Potato1008ypy/dsh-purge-0.2.1rc2-fix#v1.1.71-dsh0.2.1rc2-fix.7"
+```
+
+`dsh plugin --profile desktop` 会被直接拒绝（`profile "desktop" is managed exclusively by the Electron application`）；`<DSH 安装目录>\resources\app\lib\desktop-cli.js` 是唯一放行入口。这条路径会同时写入 `dependencies` 与 `dsh.profile.bundles`，需先退出 DSH。
+
+### 4 · 桌面端「插件」页（GUI）
+
+1. 打开 **「插件」页 → 添加插件**，粘贴 Git 地址或本地绝对路径。
+2. 装完后在**同一页**点「启动」，然后完整退出并重新启动 DSH。
+3. 会话标题旁点 **dsh-purge → 清洗 → 应用**；成功后 DSH 会自动再重启一次。
+
+> **实测：profile 里装了带原生模块的插件（如 web-ui 那一套）时，这条路径会反复失败。** pnpm 要重命名 `node_modules` 里的原生模块目录，而正在运行的 DSH 占着它，报 `ERR_PNPM_EPERM`；GUI 安装又要求 DSH 运行，构成死锁。这类环境改用上面 1–3 任一条。
+
+宿主在添加前会执行一次 `git ls-remote` 连通性检查（默认 5 秒超时），网络不可达时会明确报错。
+
+### 不要在 dsh-market（插件市场）里启用
+
+> dsh-market 的启用只走热挂载一条路径（`dshmarket/lib/routes.js:773`），失败即保持禁用，且**不写 `dsh.profile.bundles`**。本插件的 bundle patch 含 `inject` 与 `config`，热挂载必然失败，因此它「重启后生效」的提示不会发生。启用请使用方式 1 或 3（它们会写 `bundles`）。
+
+完整参考——入口能力对照、验收步骤、旧版本迁移、卸载与故障排查——见 **[INSTALL.md](INSTALL.md)**。
+
+## 验证
+
+```bash
+cd <DSH_HOME>/profiles/desktop/node_modules/dsh-purge
+node test/fixes.test.mjs          # 等价于 npm test
+```
+
+预期输出末行 `全部通过：22 passed, 0 failed`，退出码 `0`。该测试覆盖 FIX-07 至 FIX-09，不需要网络，也不需要宿主的 `yaml`。
+
+## 文档索引
+
+| 文件 | 用途 |
+|---|---|
+| [QUICKSTART.md](QUICKSTART.md) | 一页纸安装流程，按步骤照做即可 |
+| [INSTALL.md](INSTALL.md) · [INSTALL.en.md](INSTALL.en.md) | 完整安装参考：路径发现、profile 判定、验证清单、故障救援 |
+| [FIXES.md](FIXES.md) · [FIXES.en.md](FIXES.en.md) | 九处修复的逐条说明：症状 → 根因 → 改动 → 复核命令 |
+| [FORK-NOTES.md](FORK-NOTES.md) | 分支定位、修复范围、向上游合并的建议 |
+| [CHANGELOG.md](CHANGELOG.md) | 版本变更记录 |
+| [dsh-purge-repair.mjs](dsh-purge-repair.mjs) | 自愈工具：重复 insert 块与退役键，路径自定位 |
+
+## 与上游的关系、署名与许可
+
+- **上游**：[`YuJunZhiXue/dsh-purge`](https://github.com/YuJunZhiXue/dsh-purge)（MIT），作者**小杨**。
+- **著作权**：原始代码、提示词与文档的著作权全部归上游作者。本仓库仅就适配修复部分主张修改版权（`Copyright (c) 2026 Star`）。
+- **分支性质**：社区适配分支，非上游官方发布，不提供官方背书。
+- **署名要求**：依上游要求，任何借用其名称、思路、代码或提示词的项目须保留署名并注明来源仓库；本仓库在 `LICENSE`、`package.json` 与本文件中均保留上游署名。
+- **维护状态**：上游已声明暂停更新（详见附录 A）。本仓库自行发版。
+
+> **不要通过包管理器更新本插件。** 本分支与上游的 `version` 字段同为 `1.1.71`（本分支带 `-dsh0.2.1rc2-fix.N` 后缀），插件管理器可能提示「可更新」；执行 `pnpm update dsh-purge` 或接受一键更新会用上游版本覆盖修复。更换版本时应先移除 `bundles` 中的 `dsh-purge`、清理 `node_modules/dsh-purge`，再以上述 URL 重新安装。
+
+## 已知限制与设计取舍
+
+1. **FIX-07 / FIX-09 未经真机故障复现即已修复**：两者均为静态可判定的缺陷（方法缺失、Promise 未 await），修复后以离线测试与前后对照验证，未在产生故障的原始场景中复现。
+2. **`HOST_FD` 与 `HOST_SYNC` 分表**：fd 类方法的首个参数是文件描述符而非路径，若复用 `route()` 会把 `String(fd)` 当作路径探测 asar 并污染探针缓存，因此单独装配、直接落到 `node:fs`。
+3. **Ctrl+Enter 行为保持不变（有意为之）**：补丁 `#85` / `#86` 将 session-controller 的 `case "steer"` 改为 `followup`，使 UI 发送一律走新 turn，以抑制「二轮立刻发送被拒」的竞态。副作用是 Ctrl+Enter 不打断当前轮次，而是排队为下一轮。上游后续版本改回了 `agent.steer`；本分支保留现状，因为回退会重新引入上述竞态。如需回退，改动点为 `lib/core.js` 中 `#85` 的 `replace` 与 `#86` 的首个 `replace`。
+4. **`retired` 标记的语义**：标记为 `retired` 的补丁报 `na` 而非 `skipped`，表示「宿主结构已不存在、无需应用」，与「匹配失败」不同。
+5. **平台覆盖**：验证基线为 Windows + DSH Desktop `0.2.1-rc.2`；`web` profile 与 `0.2.0-rc.2` 未做逐项回归。
+6. **`0.2.1-rc.2` 之后的宿主变更**：补丁锚点可能再次漂移。宿主升级后应重新运行 `lib/audit-apply.mjs` 与 `lib/audit-compose.mjs` 定位失配的 pattern。
+
+## 许可
+
+MIT。原始版权 `Copyright (c) 2026 小杨`，本仓库修改部分 `Copyright (c) 2026 Star`。全文见 [LICENSE](LICENSE)。
+
+---
+
+# 附录 A · 上游 README 原文
+
+> 以下为上游 `YuJunZhiXue/dsh-purge` 的 README 全文，依 MIT 协议原样保留，未改动内容（仅移除了本仓库新增的目录项）。其中「适配范围」「安装」等章节针对上游 `1.1.71` 自身，与上文描述的本分支安装方式**不同**，请以上文与 [INSTALL.md](INSTALL.md) 为准。
 
 > **暂停更新。** 作者因工作安排，近期没有稳定收入，项目维护暂时搁置：不再发版、暂不收 issue / PR，也不保证跟进新版 dsh。仓库仍可自用；赞助见下方。恢复维护时会在本 README 说明。
 
@@ -126,8 +286,6 @@ Harness 不只是把问题交给模型。它还会在运行时改提示词、审
 
 ### ⚠️ 严正法律免责与合规使用声明
 
-
-
 **免责声明：** 本项目为非营利开源项目，遵守国家法律法规及所在平台的相关规范，仅供学习与研究使用。不得将本项目用于任何违法违规用途；由此产生的后果由使用者自行承担。
 
 **【零容忍严正申明】**：本项目坚决反对并严禁任何形式的违法犯罪行为！本项目开发者绝不支持、不鼓励、不协助任何未授权网络攻击、漏洞利用、数据窃取、非法侵入计算机信息系统或生成违法违禁内容的活动。**任何将本项目用于违法犯罪的行为，均与开发者无关，由行为人依法独立承担全部法律责任。**
@@ -151,8 +309,6 @@ Harness 不只是把问题交给模型。它还会在运行时改提示词、审
 8. **违约即终止授权**：任何将本项目用于非法攻击、恶意活动或违规行为的个人或实体，其开源软件使用许可将自违法违规行为发生之日起**自动且不可撤销地立即终止**。该主体须立即停止使用并永久销毁本项目的所有代码、脚本与衍生数据，并依法承担相应法律制裁。
 9. **第三方独立性声明**：本项目属于完全独立的开源安全评测研究项目，与 DeepSeek 官方或其关联主体无任何隶属、商业合作、授权或官方背书关系。文中「官方」仅指评测对象为使用者本机安装的官方 DeepSeek Harness 软件包，**不代表** DeepSeek 官方开发、认可或担保本插件。
 10. **必须署名**：借用本项目的名称、思路、代码或提示词，必须署名并标明本仓库。不署名将依法追究责任。详见 [署名要求](#署名要求)。
-
-
 
 
 
@@ -271,6 +427,23 @@ $cands | Select-Object -Unique | Where-Object { $_ -and (Test-Path (Join-Path $_
 **2. 把插件放到 `$DSH_HOME/plugins/dsh-purge`**（目录名必须是 `dsh-purge`，其 `package.json` 里 `"name"` 也必须是 `dsh-purge`）。
 
 ```sh
+<div>
+
+> **⚠️ 下面这一整段是上游原文，它的安装命令不要照抄。**
+> 它 clone / 下载的是**上游** `dsh-purge`，而上游 `1.1.71` **在 DSH Desktop `0.2.1-rc.2` 上跑不起来**。
+> 请改用本 fork：
+>
+> ```sh
+> git clone --branch v1.1.71-dsh0.2.1rc2-fix https://github.com/Potato1008ypy/dsh-purge-0.2.1rc2-fix.git "$DSH_HOME/plugins/dsh-purge"
+> # （没有 git？下载 Release 压缩包解压到这里；不要把 tarball 地址喂给 pnpm，见 INSTALL.md 7.5）
+> ```
+>
+> 这一段里的其余内容（路径、`package.json` 改动、应用步骤）仍然适用。
+> 本 README 的其余部分均为上游原文，保持原样未删改，因此里面仍会指向上游仓库。
+> 本 fork 的完整安装步骤见 **[INSTALL.md](INSTALL.md)**。
+
+</div>
+
 git clone https://github.com/YuJunZhiXue/dsh-purge.git "$DSH_HOME/plugins/dsh-purge"
 ```
 
@@ -496,16 +669,12 @@ flowchart TD
   F --> G["注入插件加密默认（提示词框默认显示的那份）"]
 ```
 
-
-
 每次会话的覆盖：
 
 ```mermaid
 flowchart TD
   A["重启或新会话"] --> B["注入插件加密默认，不必点保存，不读宿主磁盘"]
 ```
-
-
 
 每一轮的提示词注入与规则集决策。左边三个输入就是你在 dsh-purge 面板里控制的东西，虚线表示它们各自驱动哪一步判定：
 
@@ -536,8 +705,6 @@ flowchart TD
   P -.-> G
 ```
 
-
-
 Skill 不进注入段：
 
 ```mermaid
@@ -546,8 +713,6 @@ flowchart LR
   B --> C["由 DSH 加载"]
   C --> D["卸载插件不删用户 Skill"]
 ```
-
-
 
 ---
 

@@ -306,18 +306,27 @@
         modelSelectionSettings: true
         backgroundMode: continuable
         # 子智能体是角色执行者（信息收集/资产梳理/漏洞发现/漏洞利用/内网渗透），**必须是叶子节点**：
-        # 靠提示词劝"不要再往下委派"是软的——模型完全可以无视。这里直接把委派工具从子会话的
-        # 工具目录里摘掉，子智能体连看都看不到 subagent / subagent_fork / workflow / ralph。
-        # maxDepth 同时收成 1 作为二道保险（默认 3 层太深，会白吃并发预算与上下文）。
+        # 靠提示词劝"不要再往下委派"是软的——模型完全可以无视。
+        #
+        # 0.2.1-rc.2 起宿主把 `toolFilter` / `persona` 从 @deepseek-ai/dsh-tool-subagent 的
+        # Config 里删了（还写就 throw："toolFilter is no longer supported; configure persona
+        # and tool plugins in an Agent Preset"），整个工具行挂不上 → 预设 broken → 派活全废。
+        # 不要再把 toolFilter 写回来——它是让整行 throw 的键，不是无害的冗余配置。
+        #
+        # 但 toolFilter 原来还兼职"把 workflow / ralph 从子代理摘掉"，这层约束不能一起丢，
+        # 必须另外补回来（取自 evilevil/dsh-purge-021rc2 的对应修法）：
+        #   ① maxDepth: 1 —— 子会话再调 tool-subagent 时 resolveChildDepth 直接报
+        #      "subagent depth 2 exceeds maxDepth 1"，这条路径确实堵住了；
+        #   ② 可 workflow / ralph 是**另一条**路径：dsh-workflow-ptc 的 childRequest()
+        #      组 spawn 请求时只带 prompt/provider/model/schema，**不带 maxDepth**
+        #      （该文件里 maxDepth 出现 0 次），于是落到 dsh-tool-subagent schema 的
+        #      `.default(10)`。子代理只要能调到这两个工具，就能绕过 maxDepth: 1 递归
+        #      拉起孙代理，叶子边界形同虚设。
+        # 所以下面 tool-workflow / tool-ralph 必须 disabled: true —— 子会话默认继承父预设
+        # 的工具表（agentPreset 省略即 inherit the parent agent's current preset），
+        # 只有在预设里摘掉，才是真的从子代理手上摘掉。
+        # 红队五个执行角色走 tool-subagent(spawn)，不依赖 workflow / ralph。
         maxDepth: 1
-        # 注意：不能 deny `subagent` —— 它是这一行自己注册的 scoped 工具，不在全局工具库里，
-        # 写进 deny 会让 tools.restrict() 校验失败、整个委派路径报 "unknown global tool"（v0.8.0 踩过）。
-        # 子智能体拿不到 subagent_fork/workflow/ralph，加上 maxDepth: 1，实际已无派发能力。
-        toolFilter:
-          deny:
-            - subagent_fork
-            - workflow
-            - ralph
 
     # Fork omits model selection so provider/model stay equal to the parent and
     # the inherited history remains eligible for KV Cache reuse. This preset
@@ -365,11 +374,18 @@
       config:
         provider: spawn
 
+    # workflow / ralph 的引擎（workflow-ptc）仍然挂着，但**工具**不给：
+    # 子会话默认继承父预设的工具表，这两行一旦开启，子代理就能用它们绕过
+    # tool-subagent 的 maxDepth: 1 递归拉起孙代理（childRequest 不带 maxDepth，
+    # 见上面 tool-subagent 那段注释）。原预设靠 toolFilter.deny 摘掉，该机制
+    # 在 0.2.1 已删除，所以改为在这里 disabled。红队角色不需要它们。
     - id: tool-workflow
       name: '@deepseek-ai/dsh-tool-workflow'
+      disabled: true
 
     - id: tool-ralph
       name: '@deepseek-ai/dsh-tool-ralph'
+      disabled: true
       config:
         subagentProvider: spawn
         maxRounds: 64

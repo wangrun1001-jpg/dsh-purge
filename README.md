@@ -1,33 +1,193 @@
+> **Maintenance fork: wangrun1001-jpg/dsh-purge.** This repository integrates the DSH 0.2.1-rc.2 adapter `v1.1.71-dsh0.2.1rc2-fix.7` from [Potato1008ypy](https://github.com/Potato1008ypy/dsh-purge-0.2.1rc2-fix), pinned to `e9f03ca1c03d05b1010eadf8424c4e0737d40295`. Original dsh-purge by **小杨 / YuJunZhiXue**; archive preserved by **mmparko**. See [MIRROR-NOTICE.md](MIRROR-NOTICE.md) for provenance.
+>
+> The installation metadata points to this fork. The adapter's original installation scripts and detailed instructions below are retained with attribution. Installing the plugin does not apply host-cleaning patches; Apply and application restarts are separate user actions.
+
 <p align="center">
   <img src="docs/banner.svg" alt="dsh-purge" width="720">
 </p>
 
-<h1 align="center">⚔️ DeepSeek Harness cybersecurity red-team tool (dsh-purge)</h1>
-
-<p align="center"><strong>Version 1.1.71</strong></p>
+<h1 align="center">dsh-purge · Adapter fixes for DSH Desktop 0.2.1-rc.2</h1>
 
 <p align="center">
-  <em>DeepSeek Harness jailbreak: every model, swap prompts per model. Default prompt for 小码酱. Please star ⭐ If you build on this, see Attribution required.</em>
+  <sub>Base: upstream <code>1.1.71</code> (commit <code>6c1d638</code>) · License: MIT · Intended for local security research and authorized testing</sub>
 </p>
 
 <p align="center">
-  <a href="https://github.com/YuJunZhiXue/dsh-purge/stargazers"><img src="https://img.shields.io/github/stars/YuJunZhiXue/dsh-purge?logo=github&label=Stars" alt="GitHub stars"></a>
-  <a href="https://github.com/YuJunZhiXue/dsh-purge/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-MIT-65a30d?style=flat" alt="MIT license"></a>
-  <a href="https://awesome-dsh-plugin.com"><img src="https://awesome-dsh-plugin.com/badge.svg" alt="awesome · DSH plugin"></a>
-  <a href="https://deepseek.stream/plugins/dsh-purge"><img src="https://img.shields.io/badge/Hub-dsh--purge-1a73e8" alt="DeepSeek Harness Hub"></a>
-  <a href="https://www.deepseek.com/harness/"><img src="https://img.shields.io/badge/dsh-0.2.0--rc.2-blue" alt="DSH"></a>
+  <a href="https://github.com/Potato1008ypy/dsh-purge-0.2.1rc2-fix/stargazers"><img src="https://img.shields.io/github/stars/Potato1008ypy/dsh-purge-0.2.1rc2-fix?logo=github&label=Stars" alt="GitHub stars"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-65a30d?style=flat" alt="MIT license"></a>
+  <a href="https://github.com/YuJunZhiXue/dsh-purge"><img src="https://img.shields.io/badge/upstream-YuJunZhiXue%2Fdsh--purge-6b7280" alt="Upstream"></a>
+  <a href="https://github.com/Potato1008ypy/dsh-purge-0.2.1rc2-fix/releases"><img src="https://img.shields.io/badge/version-1.1.71--dsh0.2.1rc2--fix.2-16a34a" alt="Version"></a>
+  <a href="https://www.deepseek.com/harness/"><img src="https://img.shields.io/badge/dsh-0.2.1--rc.2-blue" alt="DSH"></a>
+  <a href="QUICKSTART.md"><img src="https://img.shields.io/badge/install-one--page-16a34a" alt="One-page install"></a>
   <br>
   <img src="https://img.shields.io/badge/Node.js-%3E%3D18-339933?logo=node.js&logoColor=fff" alt="Node.js">
   <img src="https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=000" alt="JavaScript">
 </p>
 
 <p align="center">
-  <a href="https://dsh-plugin.org/plugins/yujunzhixue/dsh-purge"><img src="https://dsh-plugin.org/badges/listed.svg" alt="Listed on dsh-plugin.org"></a>
-</p>
-
-<p align="center">
   <a href="README.md">English</a> | <a href="README.zh-CN.md">中文</a>
 </p>
+
+---
+
+## Overview
+
+This repository is an adapter branch of [`YuJunZhiXue/dsh-purge`](https://github.com/YuJunZhiXue/dsh-purge), pinned to upstream `1.1.71` (commit `6c1d638`, release [v1.1.71](https://github.com/YuJunZhiXue/dsh-purge/releases/tag/v1.1.71)).
+
+Upstream `1.1.71` does not work on DSH (DeepSeek Harness) `0.2.1-rc.2`. Nine structural changes on the host side make the plugin fail — by throwing or by silently doing nothing — during load, composition, patch application, or prompt assembly; one of them prevents DSH from starting at all. This repository fixes those nine points under three constraints:
+
+- **No product-behaviour changes.** Prompt content is not rewritten and no feature is removed; existing behaviour is only made to hold again on the new host.
+- **Version-adaptive.** Every fix probes the host structure and steps aside on older hosts such as `0.2.0-rc.2`.
+- **Regressable.** A bundled offline test locks each fix in place; it needs neither the network nor the host's `yaml`.
+
+Beyond the code fixes, the patch registry gains a `retired` flag so that "did not match" and "no longer applicable" are distinguishable in the status panel (expected final state `applied 66 / na 15 / pending 1`, where `#40` only matches in complete mode).
+
+## Compatibility
+
+| Host | Profile | Status |
+|---|---|---|
+| DSH Desktop `0.2.1-rc.2` (Windows) | `desktop` | **Verified** — the baseline for this repository |
+| dsh CLI `0.2.1-rc.2` | `web` | Same set of fixes applies; not re-tested item by item this round |
+| DSH `0.2.0-rc.2` | `desktop` / `web` | Fixes are version-adaptive; not re-tested item by item |
+| DSH < `0.2.0` | — | Not supported |
+
+Note: original DSH and DSH Desktop are the **same package** `@deepseek-ai/dsh` with identical `bundles` composition logic; they differ only in which entry point may manage the `desktop` profile (see *Install*). Runtime requires Node.js **≥18**; avoiding a console flash on Windows requires **≥22**.
+
+## Fix list
+
+| ID | Symptom | Root cause (host evidence) | Treatment |
+|---|---|---|---|
+| FIX-01 | **DSH will not start** after enabling; config rows render twice; two `dsh-purge-redteam-store` instances contend for one SQLite file | `cordis.patch.yml` carried two `- insert:` blocks, so all four plugin rows were inserted twice; the host re-parses that file on every boot | Collapsed to a single block (1 insert block / 4 plugin rows) |
+| FIX-02 | `[E] [tool-subagent] toolFilter is no longer supported`; the preset will not mount | `0.2.1-rc.2` removed `toolFilter` / `persona` from the `@deepseek-ai/dsh-tool-subagent` Config; writing either one throws | Key dropped from the template; `repairDelegation()` gained a line-wise strip that migrates old presets automatically |
+| FIX-03 | `unknown prompt variable "{{cwd}}"`; working directory empty or `{ {cwd}}` | `0.2.1` registers only `model` / `provider`; strict interpolation of an unregistered variable throws and drops the whole section batch | The plugin registers `cwd` itself; the persona section prefers a literal path |
+| FIX-04 | Patch `#40 COMPLETE_PROMPT_KEEP_INJECT` silently stops matching | Host `assemble()` narrowed `contexts` to a `requiredContexts` filter, so the old anchor no longer fits | Added a `0.2.1`-shaped pattern; the replacement body moved into `completePromptInjectBody()` |
+| FIX-05 | Every `desktop-shell` patch silently fails | The `0.2.1` executable is named `DSH Desktop.exe`, while `isOfficialHarnessExecutable` recognised only `deepseek-harness` | Added `DSH Desktop.exe` / `dsh-desktop.exe` with a tolerant matcher |
+| FIX-06 | One failed interpolation wipes the whole persona | Host `assemble()` returns `{ sections: [] }` on error | Rebuild the section table in registration order and drop only the sections that fail |
+| FIX-07 | No `.dshpurge.bak` is ever written, so restore and uninstall are dead | `HOST_SYNC` in `extract-asar.js` lacked `closeSync`, and `hostFs` is generated from that table; `backupAll()`'s placeholder handle is never released, so rename fails with `EPERM` on Windows | Added a separate `HOST_FD` table for fd-based methods |
+| FIX-08 | The preset claims subagents are leaves, yet they recurse through `workflow` / `ralph` | `workflow-ptc`'s `childRequest()` carries no `maxDepth`, falling back to the host default of 10; children inherit the parent preset's tool table | `tool-workflow` / `tool-ralph` set to `disabled: true`; the engine stays mounted |
+| FIX-09 | Clicking Apply ends in `dsh: fatal load failure` | A synchronous function calls async `atomicCopyFile()` without `await`; the rejection escalates through `unhandledRejection` to `uncaughtException` | Switched to `atomicWriteSync()`, equally atomic but fully synchronous |
+
+FIX-01 through FIX-06 were located in this repository. FIX-07 through FIX-09 were merged after a line-by-line comparison with [`evilevil/dsh-purge-021rc2`](https://github.com/evilevil/dsh-purge-021rc2); the implementation differs from that repository and the tradeoffs are recorded in [FIXES.en.md](FIXES.en.md).
+
+Per-fix symptoms, root causes, changes and verification: **[FIXES.en.md](FIXES.en.md)**. Known limitations and deliberate tradeoffs are listed below.
+
+## Install
+
+Installation has three steps: **install → enable → patch the host**. The first two make the host load this plugin; only the third rewrites host files, and it never happens on its own.
+
+| Step | Where |
+|---|---|
+| 1 · Install | `install.ps1`, or Plugins page → **Add plugin** |
+| 2 · Enable | The one-click script writes `bundles` for you; otherwise same page → **Enable**, then restart DSH |
+| 3 · Patch | **dsh-purge → Clean → Apply** next to the session title |
+
+In recommended order — pick one of the four:
+
+| Order | Route | Quit DSH first? | Writes `bundles` |
+|---|---|---|---|
+| 1 | One-click `install.ps1` | Yes | ✅ |
+| 2 | `pnpm add` | No | ❌ (enable once by hand) |
+| 3 | Desktop command-line helper | Yes | ✅ |
+| 4 | GUI "Plugins" page | No (but may hit `EPERM`) | ✅ |
+
+### 1 · One-click script (Windows, least work)
+
+```powershell
+# fully quit DSH first
+powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1
+```
+
+No clone needed — one line fetches and runs it:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -Command "iwr -UseB https://raw.githubusercontent.com/Potato1008ypy/dsh-purge-0.2.1rc2-fix/v1.1.71-dsh0.2.1rc2-fix.7/install.ps1 -OutFile $env:TEMP\dsh-purge-install.ps1; & $env:TEMP\dsh-purge-install.ps1"
+```
+
+It detects the DSH install directory and run mode, installs the package, then writes `dsh.profile.bundles` — **it takes effect on restart with no enable click**, collapsing steps 1 and 2 above into one. The script refuses to run while DSH is up (that path hits `ERR_PNPM_EPERM`). Full switch list: [INSTALL.en.md](INSTALL.en.md) 2.0.
+
+### 2 · Installing with `pnpm add` (most direct)
+
+```bash
+pnpm add "github:Potato1008ypy/dsh-purge-0.2.1rc2-fix#v1.1.71-dsh0.2.1rc2-fix.7"
+```
+
+`pnpm add` writes `dependencies` only — it does not register `dsh.profile.bundles`. Afterwards you must enable it on the **Plugins page**, then restart DSH.
+
+> **Do not install from the Release tarball URL.** The host passes `CI=true` to pnpm (frozen mode), under which `pnpm add <remote tarball URL>` records the dependency without an `integrity` field. The moment the bytes are actually needed (another machine, empty cache, `--frozen-lockfile`), pnpm refuses — and because that verification runs before any operation, it **freezes every install and uninstall in that profile** with `ERR_PNPM_MISSING_TARBALL_INTEGRITY`. GitHub sources and local `file:` archives do not trigger it. Recovery: [INSTALL.en.md](INSTALL.en.md) section 7.5.
+
+### 3 · Desktop command line (helper)
+
+```bat
+:: dsh-plugin.bat wraps desktop-cli.js; see INSTALL.en.md
+dsh-plugin.bat plugin --profile desktop add "github:Potato1008ypy/dsh-purge-0.2.1rc2-fix#v1.1.71-dsh0.2.1rc2-fix.7"
+```
+
+Calling `dsh plugin --profile desktop` directly is rejected (`profile "desktop" is managed exclusively by the Electron application`); `<DSH install dir>\resources\app\lib\desktop-cli.js` is the only gate that lets it through. That path writes **both** `dependencies` and `dsh.profile.bundles`; quit DSH first.
+
+### 4 · Desktop "Plugins" page (GUI)
+
+1. Open the **Plugins page → Add plugin** and paste a Git URL or an absolute local path.
+2. When it finishes, click **Enable** on the **same** page, then fully quit and restart DSH.
+3. Click **dsh-purge → Clean → Apply** next to the session title; on success DSH restarts itself once more.
+
+> **Measured: on a profile that carries plugins with native modules (a web-ui set, for instance) this route keeps failing.** pnpm must rename native-module directories under `node_modules` and the running DSH has them mapped, so it reports `ERR_PNPM_EPERM`; a GUI install needs DSH running, which is the deadlock. Use routes 1–3 in such an environment.
+
+Before adding, the host performs a `git ls-remote` reachability check (5-second timeout by default) and reports unreachable networks explicitly.
+
+### Do not enable it in dsh-market
+
+> dsh-market's enable only attempts a hot mount (`dshmarket/lib/routes.js:773`); on failure it leaves the plugin disabled and **never writes `dsh.profile.bundles`**. This plugin's patch carries `inject` and `config`, so the hot mount always fails — its "activates on restart" message never comes true. Enable it via route 1 or 3 instead (they write `bundles`).
+
+For the full reference — entry-point capabilities, verification, migrating from an older version, uninstalling and troubleshooting — see **[INSTALL.en.md](INSTALL.en.md)**.
+
+## Verify
+
+```bash
+cd <DSH_HOME>/profiles/desktop/node_modules/dsh-purge
+node test/fixes.test.mjs          # same as npm test
+```
+
+Expected last line `全部通过：22 passed, 0 failed`, exit code `0`. The test covers FIX-07 through FIX-09 and needs neither the network nor the host's `yaml`.
+
+## Documentation
+
+| File | Purpose |
+|---|---|
+| [QUICKSTART.md](QUICKSTART.md) | One-page install procedure, follow step by step |
+| [INSTALL.md](INSTALL.md) · [INSTALL.en.md](INSTALL.en.md) | Full install reference: path discovery, profile detection, verification checklist, recovery |
+| [FIXES.md](FIXES.md) · [FIXES.en.md](FIXES.en.md) | Per-fix detail for all nine: symptom → root cause → change → how to re-check |
+| [FORK-NOTES.md](FORK-NOTES.md) | Scope of this branch and suggestions for merging upstream |
+| [CHANGELOG.md](CHANGELOG.md) | Version history |
+| [dsh-purge-repair.mjs](dsh-purge-repair.mjs) | Self-healing tool for duplicated insert blocks and retired keys; locates itself, no hardcoded paths |
+
+## Upstream, attribution and licensing
+
+- **Upstream**: [`YuJunZhiXue/dsh-purge`](https://github.com/YuJunZhiXue/dsh-purge) (MIT), author **小杨**.
+- **Copyright**: all rights in the original code, prompts and documentation belong to the upstream author. This repository claims copyright only over its adapter changes (`Copyright (c) 2026 Star`).
+- **Nature of this branch**: a community adapter, not an official upstream release, and not endorsed upstream.
+- **Attribution requirement**: per the upstream requirement, any project reusing its name, ideas, code or prompts must retain attribution and name the source repository. This repository keeps the upstream attribution in `LICENSE`, `package.json` and this file.
+- **Maintenance**: upstream has announced that updates are paused (see Appendix A). This repository releases on its own schedule.
+
+> **Do not update this plugin through a package manager.** This branch and upstream share the `version` field `1.1.71` (this branch appends `-dsh0.2.1rc2-fix.N`), so the plugin manager may offer an "update"; running `pnpm update dsh-purge` or accepting a one-click update overwrites the fixes with the upstream build. To change versions, first remove `dsh-purge` from `bundles`, clean `node_modules/dsh-purge`, then reinstall from the URL above.
+
+## Known limitations and tradeoffs
+
+1. **FIX-07 and FIX-09 were fixed without reproducing the original field failure.** Both are statically decidable defects (a missing method, an un-awaited Promise); they were verified with the offline test and a before/after comparison, not by recreating the original crash.
+2. **`HOST_FD` is kept separate from `HOST_SYNC`.** An fd-based method's first argument is a file descriptor, not a path; reusing `route()` would probe asar with `String(fd)` and pollute the probe cache. They are therefore installed separately and go straight to `node:fs`.
+3. **Ctrl+Enter behaviour is deliberately unchanged.** Patches `#85` / `#86` rewrite the session-controller's `case "steer"` to `followup`, so a UI send always opens a new turn; this suppresses a race where an immediate second message was rejected. The side effect is that Ctrl+Enter queues the next turn instead of interrupting the current one. Later upstream versions reverted to `agent.steer`; this branch keeps the current behaviour because reverting would reintroduce that race. To revert, change the `replace` of `#85` and the first `replace` of `#86` in `lib/core.js`.
+4. **Semantics of the `retired` flag.** A patch marked `retired` reports `na` rather than `skipped`, meaning "the host structure no longer exists, nothing to apply" as opposed to "matching failed".
+5. **Platform coverage.** The verification baseline is Windows with DSH Desktop `0.2.1-rc.2`; the `web` profile and `0.2.0-rc.2` were not re-tested item by item.
+6. **Host changes after `0.2.1-rc.2`.** Patch anchors may drift again. After a host upgrade, re-run `lib/audit-apply.mjs` and `lib/audit-compose.mjs` to locate the patterns that no longer match.
+
+## License
+
+MIT. Original copyright `Copyright (c) 2026 小杨`; modifications in this repository `Copyright (c) 2026 Star`. Full text in [LICENSE](LICENSE).
+
+---
+
+# Appendix A · Upstream README (verbatim)
+
+> The full upstream README of `YuJunZhiXue/dsh-purge`, retained verbatim under the MIT license with no content changes (only the table-of-contents entry added by this repository was removed). Its "Scope" and "Install" sections describe upstream `1.1.71` itself and **differ** from the install procedure of this branch; defer to the sections above and to [INSTALL.en.md](INSTALL.en.md).
 
 > **Updates paused.** The author has no steady income for now because of work. Maintenance is on hold: no new releases, issues / PRs are not taken, and new dsh versions are not guaranteed. The repo stays usable; see Sponsor below. When maintenance resumes, this README will say so.
 
@@ -271,10 +431,41 @@ $cands | Select-Object -Unique | Where-Object { $_ -and (Test-Path (Join-Path $_
 **2. Put the plugin at `$DSH_HOME/plugins/dsh-purge`** (folder must be named `dsh-purge`, with a `package.json` whose `"name"` is `dsh-purge`).
 
 ```sh
+<div>
+
+> **⚠️ The sections below are upstream's original text — do not copy its install commands.**
+> They clone / download **upstream** `dsh-purge`, whose `1.1.71` **does not run on DSH Desktop `0.2.1-rc.2`**.
+> Use this fork instead:
+>
+> ```sh
+> git clone --branch v1.1.71-dsh0.2.1rc2-fix https://github.com/Potato1008ypy/dsh-purge-0.2.1rc2-fix.git "$DSH_HOME/plugins/dsh-purge"
+> # (no git? download the Release archive and extract it here — do not feed the tarball URL to pnpm, see INSTALL.en.md 7.5)
+> ```
+>
+> Everything else in those sections (paths, `package.json` edits, Apply steps) still applies.
+> The rest of this README is upstream's original text, kept verbatim; it intentionally still
+> points at the upstream repository. See **[INSTALL.en.md](INSTALL.en.md)** for this fork's steps.
+
+</div>
+
 git clone https://github.com/YuJunZhiXue/dsh-purge.git "$DSH_HOME/plugins/dsh-purge"
 ```
 
 Without git: download [master.tar.gz](https://github.com/YuJunZhiXue/dsh-purge/archive/refs/heads/master.tar.gz), extract, rename `dsh-purge-master` → `dsh-purge`, and place it under `plugins`. If you already have a clone, copy the whole tree — not a few `.js` files.
+
+> [!WARNING]
+> **This section below is upstream's original text. Do not follow its install commands as-is.**
+> It clones/downloads **upstream** `dsh-purge`, whose `1.1.71` **does not run on DSH Desktop `0.2.1-rc.2`**.
+> Use this fork instead:
+>
+> ```sh
+> git clone --branch v1.1.71-dsh0.2.1rc2-fix https://github.com/Potato1008ypy/dsh-purge-0.2.1rc2-fix.git "$DSH_HOME/plugins/dsh-purge"
+> # (no git? download the Release archive and extract it here — do not feed the tarball URL to pnpm, see INSTALL.en.md 7.5)
+> ```
+>
+> Everything else in that section (paths, `package.json` edits, Apply steps) still applies.
+> The rest of this README is upstream's original text, kept verbatim; it intentionally still
+> points at the upstream repository. See **[INSTALL.en.md](INSTALL.en.md)** for this fork's steps.
 
 **3. Edit only that profile's `package.json` — back it up first.** Web → `$DSH_HOME/profiles/web/package.json`; desktop → `$DSH_HOME/profiles/desktop/package.json`. Add **only two things**, keeping every existing dependency and bundle:
 

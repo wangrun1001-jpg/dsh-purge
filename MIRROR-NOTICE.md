@@ -1,3 +1,18 @@
+# 本仓库的适配维护说明
+
+本仓库 `wangrun1001-jpg/dsh-purge` 已从存档镜像更新为 DeepSeek Harness 0.2.1-rc.2 适配维护副本。
+
+- 原项目与原作者：[YuJunZhiXue/dsh-purge](https://github.com/YuJunZhiXue/dsh-purge)，小杨 / YuJunZhiXue。
+- 原镜像来源：[mmparko/dsh-purge](https://github.com/mmparko/dsh-purge)。
+- 兼容修复来源：[Potato1008ypy/dsh-purge-0.2.1rc2-fix](https://github.com/Potato1008ypy/dsh-purge-0.2.1rc2-fix)。
+- 适配基线：`v1.1.71-dsh0.2.1rc2-fix.7`，提交 `e9f03ca1c03d05b1010eadf8424c4e0737d40295`。
+- 本次保留原有提交历史；新增适配代码，并更新本仓库的说明与安装来源。原作者和适配维护者的署名、许可证继续保留。
+- 本副本的差异与验证方式见 `FORK-NOTES.md`、`FIXES.md` 和 `test/fixes.test.mjs`。
+
+本说明只记录代码来源和兼容适配，不代表 DeepSeek 官方背书，也不保证模型行为或特定提示词的成功率。
+
+## 历史镜像说明（更新前原文保留）
+
 # 镜像说明 / Mirror Notice
 
 本仓库是 **[YuJunZhiXue/dsh-purge](https://github.com/YuJunZhiXue/dsh-purge)** 的**全量镜像（mirror）**，
@@ -103,3 +118,4 @@ diff /tmp/up.txt /tmp/mine.txt
 上游 README 在备份时载明：**项目暂停更新**，作者因工作安排暂停维护、不再发版、暂不收
 issue / PR，也不保证跟进新版 dsh；仓库仍可自用。该状态与「违规商用公示」章节一并完整保留在
 `README.md` / `README.zh-CN.md` 中，本镜像不修改其任何字句。
+
